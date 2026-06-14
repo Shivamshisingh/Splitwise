@@ -1,0 +1,45 @@
+<aside class="sidebar">
+  <div class="logo-section">
+    <div class="logo">
+      <span class="logo-icon">💰</span>
+      <span class="logo-text">SplitSmart</span>
+    </div>
+    <button class="close-btn" (click)="sidebarToggle.emit()">
+      <span class="material-icon">close</span>
+    </button>
+  </div>
+
+  <div class="group-selector">
+    <label class="group-label">Active Group</label>
+    <select
+      class="group-dropdown"
+      [value]="expenseService.activeGroup()?.id ?? ''"
+      (change)="selectGroup($any($event.target).value)"
+    >
+      @for (group of expenseService.groups(); track group.id) {
+        <option [value]="group.id">{{ group.name }}</option>
+      }
+    </select>
+  </div>
+
+  <nav class="nav-menu">
+    @for (item of navItems; track item.path) {
+      <a
+        class="nav-item"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        (click)="sidebarToggle.emit()"
+      >
+        <span class="material-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="member-count">
+      <span class="material-icon">people</span>
+      <span>{{ expenseService.activeGroup()?.members?.length ?? 0 }} members</span>
+    </div>
+  </div>
+</aside>

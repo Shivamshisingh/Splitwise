@@ -1,0 +1,24 @@
+<div class="app-layout" [class.sidebar-open]="sidebarOpen()">
+  <!-- Mobile header -->
+  <header class="mobile-header">
+    <button class="menu-btn" (click)="toggleSidebar()">
+      <span class="material-icon">menu</span>
+    </button>
+    <span class="mobile-logo">💰 SplitSmart</span>
+  </header>
+
+  <!-- Sidebar -->
+  <div class="sidebar-wrapper" [class.open]="sidebarOpen()">
+    <app-sidebar (sidebarToggle)="toggleSidebar()" />
+  </div>
+
+  <!-- Overlay -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- Main content -->
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>
