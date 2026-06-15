@@ -1,0 +1,136 @@
+<div class="add-expense-page">
+  <div class="page-header">
+    <h1>Add Expense</h1>
+    <p class="subtitle">Split a new expense with your team</p>
+  </div>
+
+  <form class="expense-form" (ngSubmit)="submit()">
+    <div class="form-grid">
+      <!-- Title -->
+      <div class="form-group full-width">
+        <label>What's this expense for?</label>
+        <input
+          type="text"
+          placeholder="e.g. Team lunch at Nando's"
+          [(ngModel)]="title"
+          name="title"
+          required
+          class="form-input"
+        />
+      </div>
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input
+          type="number"
+          placeholder="0.00"
+          [(ngModel)]="amount"
+          name="amount"
+          required
+          min="0.01"
+          step="0.01"
+          class="form-input amount-input"
+        />
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label>Date</label>
+        <input
+          type="date"
+          [(ngModel)]="date"
+          name="date"
+          required
+          class="form-input"
+        />
+      </div>
+
+      <!-- Category -->
+      <div class="form-group full-width">
+        <label>Category</label>
+        <div class="category-grid">
+          @for (cat of categories; track cat.key) {
+            <button
+              type="button"
+              class="category-chip"
+              [class.selected]="category === cat.key"
+              [style.--chip-color]="cat.color"
+              (click)="category = cat.key"
+            >
+              <span class="chip-icon">{{ cat.icon }}</span>
+              <span class="chip-label">{{ cat.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Paid By -->
+      <div class="form-group full-width">
+        <label>Paid by</label>
+        <div class="paid-by-grid">
+          @for (member of members; track member.id) {
+            <button
+              type="button"
+              class="member-chip"
+              [class.selected]="paidBy === member.name"
+              (click)="paidBy = member.name"
+            >
+              <span class="member-avatar">{{ member.avatar }}</span>
+              <span>{{ member.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Split Between -->
+      <div class="form-group full-width">
+        <div class="split-header">
+          <label>Split between</label>
+          <button type="button" class="select-all-btn" (click)="selectAll()">Select All</button>
+        </div>
+        <div class="split-grid">
+          @for (member of members; track member.id) {
+            <button
+              type="button"
+              class="member-chip"
+              [class.selected]="selectedMembers.has(member.name)"
+              (click)="toggleMember(member.name)"
+            >
+              <span class="member-avatar">{{ member.avatar }}</span>
+              <span>{{ member.name }}</span>
+              @if (selectedMembers.has(member.name)) {
+                <span class="check-mark">✓</span>
+              }
+            </button>
+          }
+        </div>
+        @if (selectedMembers.size > 0 && amount) {
+          <div class="split-preview">
+            Each person pays <strong>{{ (amount / selectedMembers.size).toFixed(2) }}</strong>
+          </div>
+        }
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group full-width">
+        <label>Notes <span class="optional">(optional)</span></label>
+        <textarea
+          placeholder="Add any notes..."
+          [(ngModel)]="notes"
+          name="notes"
+          class="form-input"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" routerLink="/expenses">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="!isValid">
+        <span class="material-icon">add_circle</span>
+        Add Expense
+      </button>
+    </div>
+  </form>
+</div>

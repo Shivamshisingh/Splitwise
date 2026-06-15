@@ -1,0 +1,113 @@
+<div class="groups-page">
+  <div class="page-header">
+    <div>
+      <h1>Groups</h1>
+      <p class="subtitle">Manage your expense groups and members</p>
+    </div>
+    <button class="btn-primary" (click)="showNewGroup.set(true)">
+      <span class="material-icon">group_add</span>
+      New Group
+    </button>
+  </div>
+
+  <!-- New Group Form -->
+  @if (showNewGroup()) {
+    <div class="card new-group-card">
+      <h3>Create New Group</h3>
+      <form (ngSubmit)="createGroup()" class="inline-form">
+        <input
+          type="text"
+          class="form-input"
+          placeholder="Group name (e.g. Marketing Team)"
+          [(ngModel)]="newGroupName"
+          name="groupName"
+          required
+        />
+        <button type="submit" class="btn-primary" [disabled]="!newGroupName.trim()">Create</button>
+        <button type="button" class="btn-ghost" (click)="showNewGroup.set(false)">Cancel</button>
+      </form>
+    </div>
+  }
+
+  <!-- Groups List -->
+  <div class="groups-grid">
+    @for (group of expenseService.groups(); track group.id) {
+      <div
+        class="group-card"
+        [class.active]="expenseService.activeGroup()?.id === group.id"
+        (click)="expenseService.setActiveGroup(group.id)"
+      >
+        <div class="group-card-header">
+          <div class="group-info">
+            <h3>{{ group.name }}</h3>
+            <span class="group-meta">
+              {{ group.members.length }} members · {{ group.expenses.length }} expenses
+            </span>
+          </div>
+          @if (expenseService.activeGroup()?.id === group.id) {
+            <span class="active-badge">Active</span>
+          }
+        </div>
+
+        <div class="group-stats">
+          <div class="stat">
+            <span class="stat-label">Total Spent</span>
+            <span class="stat-value">{{ groupTotal(group.id) | currencyFormat }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Per Person (avg)</span>
+            <span class="stat-value">
+              {{ group.members.length > 0 ? (groupTotal(group.id) / group.members.length | currencyFormat) : '₹0' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="group-members">
+          <span class="members-label">Members</span>
+          <div class="member-list">
+            @for (member of group.members; track member.id) {
+              <span class="member-tag">
+                <span class="member-avatar-sm">{{ member.avatar }}</span>
+                {{ member.name }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="group-actions">
+          @if (expenseService.activeGroup()?.id === group.id) {
+            <button class="btn-outline" (click)="showAddMember.set(true); $event.stopPropagation()">
+              + Add Member
+            </button>
+          }
+          @if (expenseService.groups().length > 1) {
+            <button class="btn-danger-ghost" (click)="deleteGroup(group.id); $event.stopPropagation()">
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Add Member Modal -->
+  @if (showAddMember()) {
+    <div class="modal-overlay" (click)="showAddMember.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Add Member to {{ expenseService.activeGroup()?.name }}</h3>
+        <form (ngSubmit)="addMember()" class="inline-form">
+          <input
+            type="text"
+            class="form-input"
+            placeholder="Member name"
+            [(ngModel)]="newMemberName"
+            name="memberName"
+            required
+          />
+          <button type="submit" class="btn-primary" [disabled]="!newMemberName.trim()">Add</button>
+          <button type="button" class="btn-ghost" (click)="showAddMember.set(false)">Cancel</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

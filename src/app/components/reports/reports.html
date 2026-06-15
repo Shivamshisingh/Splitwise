@@ -1,0 +1,144 @@
+<div class="reports-page">
+  <div class="page-header">
+    <h1>Reports & Analytics</h1>
+    <p class="subtitle">Insights for {{ expenseService.activeGroup()?.name }}</p>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">💰</span>
+      <div>
+        <span class="stat-label">Total Spent</span>
+        <span class="stat-value">{{ expenseService.totalExpenses() | currencyFormat }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📊</span>
+      <div>
+        <span class="stat-label">Average Expense</span>
+        <span class="stat-value">{{ avgExpense() | currencyFormat }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📂</span>
+      <div>
+        <span class="stat-label">Categories Used</span>
+        <span class="stat-value">{{ expenseService.categoryBreakdown().length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="reports-grid">
+    <!-- Category Donut -->
+    <div class="card">
+      <h2>Category Distribution</h2>
+      <div class="donut-chart">
+        <svg viewBox="0 0 200 200" class="donut-svg">
+          @for (cat of expenseService.categoryBreakdown(); track cat.key; let i = $index) {
+            <circle
+              cx="100"
+              cy="100"
+              r="80"
+              fill="none"
+              [attr.stroke]="cat.color"
+              stroke-width="24"
+              [attr.stroke-dasharray]="(cat.percentage * 5.02) + ' ' + (502 - cat.percentage * 5.02)"
+              [attr.stroke-dashoffset]="getOffset(i)"
+              class="donut-segment"
+            />
+          }
+        </svg>
+        <div class="donut-center">
+          <span class="donut-total">{{ expenseService.totalExpenses() | currencyFormat }}</span>
+          <span class="donut-label">Total</span>
+        </div>
+      </div>
+      <div class="legend">
+        @for (cat of expenseService.categoryBreakdown(); track cat.key) {
+          <div class="legend-item">
+            <span class="legend-dot" [style.background]="cat.color"></span>
+            <span class="legend-name">{{ cat.icon }} {{ cat.label }}</span>
+            <span class="legend-value">{{ cat.percentage | number:'1.0-0' }}%</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Member Spending -->
+    <div class="card">
+      <h2>Member Contributions</h2>
+      <div class="member-chart">
+        @for (member of memberSpending(); track member.name) {
+          <div class="member-row">
+            <div class="member-info">
+              <span class="member-avatar">{{ member.name[0] }}</span>
+              <div class="member-details">
+                <span class="member-name">{{ member.name }}</span>
+                <span class="member-net" [class.positive]="member.net >= 0" [class.negative]="member.net < 0">
+                  {{ member.net >= 0 ? 'Gets back' : 'Owes' }} {{ (member.net >= 0 ? member.net : -member.net) | currencyFormat }}
+                </span>
+              </div>
+            </div>
+            <div class="member-bars">
+              <div class="bar-row">
+                <span class="bar-label">Paid</span>
+                <div class="bar-track">
+                  <div class="bar paid-bar" [style.width.%]="(member.paid / maxPaid) * 100"></div>
+                </div>
+                <span class="bar-value">{{ member.paid | currencyFormat }}</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Share</span>
+                <div class="bar-track">
+                  <div class="bar owes-bar" [style.width.%]="(member.owes / maxPaid) * 100"></div>
+                </div>
+                <span class="bar-value">{{ member.owes | currencyFormat }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Top Expenses -->
+    <div class="card full-width">
+      <h2>Top Expenses</h2>
+      <div class="top-list">
+        @for (expense of topExpenses(); track expense.id; let i = $index) {
+          <div class="top-item">
+            <span class="top-rank">#{{ i + 1 }}</span>
+            <div class="top-info">
+              <span class="top-title">{{ expense.title }}</span>
+              <span class="top-meta">{{ expense.date | date:'mediumDate' }} · {{ expense.paidBy }}</span>
+            </div>
+            <span class="top-amount">{{ expense.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-msg">No expenses recorded yet</div>
+        }
+      </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="card full-width">
+      <h2>Monthly Spending Trend</h2>
+      <div class="trend-chart">
+        @for (month of expenseService.monthlyTrend(); track month.month) {
+          <div class="trend-bar-group">
+            <div class="trend-bar-wrapper">
+              <div
+                class="trend-bar"
+                [style.height.%]="expenseService.monthlyTrend().length > 0 ? (month.amount / maxMonthlyAmount) * 100 : 0"
+              ></div>
+            </div>
+            <span class="trend-label">{{ month.month }}</span>
+            <span class="trend-value">{{ month.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-msg">No data to display</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

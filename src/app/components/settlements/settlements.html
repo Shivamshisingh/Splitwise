@@ -1,0 +1,69 @@
+<div class="settlements-page">
+  <div class="page-header">
+    <div>
+      <h1>Settlements</h1>
+      <p class="subtitle">Settle up within {{ expenseService.activeGroup()?.name }}</p>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="summary-item">
+      <span class="summary-label">Total to Settle</span>
+      <span class="summary-value">{{ totalOwed | currencyFormat }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Pending</span>
+      <span class="summary-value">{{ expenseService.balances().length - settledItems().size }}</span>
+    </div>
+  </div>
+
+  <!-- Settlement List -->
+  <div class="settlement-list">
+    @for (balance of expenseService.balances(); track balance.from + balance.to) {
+      <div class="settlement-card" [class.settled]="isSettled(balance.from, balance.to)">
+        <div class="settlement-main">
+          <div class="flow-visual">
+            <div class="person-circle from-circle">
+              <span class="person-initial">{{ balance.from[0] }}</span>
+              <span class="person-name">{{ balance.from }}</span>
+            </div>
+
+            <div class="flow-arrow">
+              <div class="arrow-line"></div>
+              <span class="arrow-amount">{{ balance.amount | currencyFormat }}</span>
+              <div class="arrow-head">→</div>
+            </div>
+
+            <div class="person-circle to-circle">
+              <span class="person-initial">{{ balance.to[0] }}</span>
+              <span class="person-name">{{ balance.to }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settlement-actions">
+          <button
+            class="settle-btn"
+            [class.settled]="isSettled(balance.from, balance.to)"
+            (click)="toggleSettle(balance.from + '->' + balance.to)"
+          >
+            @if (isSettled(balance.from, balance.to)) {
+              <span class="material-icon">check_circle</span>
+              Settled
+            } @else {
+              <span class="material-icon">payments</span>
+              Mark as Settled
+            }
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <h3>All Settled Up!</h3>
+        <p>No pending settlements in this group</p>
+      </div>
+    }
+  </div>
+</div>

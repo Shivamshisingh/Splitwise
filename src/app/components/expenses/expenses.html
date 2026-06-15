@@ -1,0 +1,80 @@
+<div class="expenses-page">
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Expenses</h1>
+      <span class="expense-count">{{ filteredExpenses().length }} items · {{ filteredTotal() | currencyFormat }}</span>
+    </div>
+    <a routerLink="/add" class="btn-primary">
+      <span class="material-icon">add</span>
+      Add Expense
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="material-icon search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Search expenses..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearch($event)"
+      />
+    </div>
+
+    <select class="filter-select" [ngModel]="filterCategory()" (ngModelChange)="updateFilter($event)">
+      <option value="">All Categories</option>
+      @for (cat of categories; track cat.key) {
+        <option [value]="cat.key">{{ cat.icon }} {{ cat.label }}</option>
+      }
+    </select>
+
+    <select class="filter-select" [ngModel]="sortBy()" (ngModelChange)="updateSort($event)">
+      <option value="date">Sort by Date</option>
+      <option value="amount">Sort by Amount</option>
+    </select>
+  </div>
+
+  <!-- Expense List -->
+  <div class="expense-list">
+    @for (expense of filteredExpenses(); track expense.id) {
+      <div class="expense-card">
+        <div class="expense-main">
+          <div class="expense-left">
+            <app-category-badge [category]="expense.category" />
+            <div class="expense-details">
+              <span class="expense-title">{{ expense.title }}</span>
+              <span class="expense-meta">
+                {{ expense.date | date:'mediumDate' }} · Paid by <strong>{{ expense.paidBy }}</strong>
+              </span>
+            </div>
+          </div>
+          <div class="expense-right">
+            <span class="expense-amount">{{ expense.amount | currencyFormat }}</span>
+            <span class="split-info">Split {{ expense.splitBetween.length }} ways</span>
+          </div>
+        </div>
+        <div class="expense-footer">
+          <div class="split-avatars">
+            @for (person of expense.splitBetween; track person) {
+              <span class="split-person" [title]="person">{{ person[0] }}</span>
+            }
+          </div>
+          @if (expense.notes) {
+            <span class="expense-note">{{ expense.notes }}</span>
+          }
+          <button class="delete-btn" title="Delete" (click)="deleteExpense(expense.id)">
+            <span class="material-icon">delete_outline</span>
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">🧾</div>
+        <h3>No expenses found</h3>
+        <p>Add your first expense to get started</p>
+        <a routerLink="/add" class="btn-primary">+ Add Expense</a>
+      </div>
+    }
+  </div>
+</div>

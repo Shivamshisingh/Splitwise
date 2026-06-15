@@ -1,0 +1,145 @@
+<div class="dashboard">
+  <div class="page-header">
+    <h1>Dashboard</h1>
+    <p class="subtitle">{{ expenseService.activeGroup()?.name ?? 'No group selected' }}</p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card total">
+      <div class="card-icon">📊</div>
+      <div class="card-info">
+        <span class="card-label">Total Expenses</span>
+        <span class="card-value">{{ expenseService.totalExpenses() | currencyFormat }}</span>
+      </div>
+    </div>
+
+    <div class="summary-card members">
+      <div class="card-icon">👥</div>
+      <div class="card-info">
+        <span class="card-label">Team Members</span>
+        <span class="card-value">{{ expenseService.activeGroup()?.members?.length ?? 0 }}</span>
+      </div>
+    </div>
+
+    <div class="summary-card transactions">
+      <div class="card-icon">🧾</div>
+      <div class="card-info">
+        <span class="card-label">Transactions</span>
+        <span class="card-value">{{ expenseService.activeGroup()?.expenses?.length ?? 0 }}</span>
+      </div>
+    </div>
+
+    <div class="summary-card settlements">
+      <div class="card-icon">🤝</div>
+      <div class="card-info">
+        <span class="card-label">Pending Settlements</span>
+        <span class="card-value">{{ expenseService.balances().length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Category Breakdown -->
+    <div class="card category-card">
+      <div class="card-header">
+        <h2>Spending by Category</h2>
+        <a routerLink="/reports" class="view-all">View Reports →</a>
+      </div>
+      <div class="category-list">
+        @for (cat of expenseService.categoryBreakdown(); track cat.key) {
+          <div class="category-row">
+            <div class="cat-info">
+              <span class="cat-icon">{{ cat.icon }}</span>
+              <span class="cat-name">{{ cat.label }}</span>
+            </div>
+            <div class="cat-bar-wrapper">
+              <div
+                class="cat-bar"
+                [style.width.%]="(cat.amount / maxCategoryAmount) * 100"
+                [style.background]="cat.color"
+              ></div>
+            </div>
+            <span class="cat-amount">{{ cat.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-state">No expenses yet</div>
+        }
+      </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="card trend-card">
+      <div class="card-header">
+        <h2>Monthly Trend</h2>
+      </div>
+      <div class="chart-area">
+        @for (month of expenseService.monthlyTrend(); track month.month) {
+          <div class="bar-group">
+            <div class="bar-container">
+              <div
+                class="bar"
+                [style.height.%]="(month.amount / maxMonthlyAmount) * 100"
+              ></div>
+            </div>
+            <span class="bar-label">{{ month.month }}</span>
+            <span class="bar-value">{{ month.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-state">No data</div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card activity-card">
+      <div class="card-header">
+        <h2>Recent Activity</h2>
+        <a routerLink="/expenses" class="view-all">View All →</a>
+      </div>
+      <div class="activity-list">
+        @for (expense of expenseService.recentExpenses(); track expense.id) {
+          <div class="activity-item">
+            <div class="activity-left">
+              <app-category-badge [category]="expense.category" />
+              <div class="activity-info">
+                <span class="activity-title">{{ expense.title }}</span>
+                <span class="activity-meta">
+                  Paid by <strong>{{ expense.paidBy }}</strong> · Split {{ expense.splitBetween.length }} ways
+                </span>
+              </div>
+            </div>
+            <span class="activity-amount">{{ expense.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <p>No expenses yet</p>
+            <a routerLink="/add" class="add-btn">+ Add your first expense</a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Quick Balances -->
+    <div class="card balances-card">
+      <div class="card-header">
+        <h2>Who Owes Whom</h2>
+        <a routerLink="/settlements" class="view-all">Settle Up →</a>
+      </div>
+      <div class="balance-list">
+        @for (balance of expenseService.balances(); track balance.from + balance.to) {
+          <div class="balance-item">
+            <div class="balance-flow">
+              <span class="person from">{{ balance.from }}</span>
+              <span class="arrow">→</span>
+              <span class="person to">{{ balance.to }}</span>
+            </div>
+            <span class="balance-amount">{{ balance.amount | currencyFormat }}</span>
+          </div>
+        } @empty {
+          <div class="empty-state">All settled up! 🎉</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
